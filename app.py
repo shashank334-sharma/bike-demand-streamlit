@@ -7,27 +7,22 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 
 st.title("🚲 Bike Demand Prediction App")
+
 # -----------------------------
-# Features & Target
+# Features & Target (GLOBAL)
 # -----------------------------
 FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
 TARGET = "cnt"
-
 
 # -----------------------------
 # Load Data
 # -----------------------------
 @st.cache_data
-@st.cache_data
 def load_data():
-    df = pd.read_csv("dataset.csv")
+    df = pd.read_csv("dataset.csv")   # make sure filename matches GitHub exactly
 
     # Replace ? with NaN
     df.replace("?", np.nan, inplace=True)
-
-    # Columns we will use
-    FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
-    TARGET = "cnt"
 
     # Convert all features + target to numeric
     for col in FEATURES + [TARGET]:
@@ -38,13 +33,12 @@ def load_data():
 
     return df
 
+# ✅ Load dataset
+df = load_data()
 
 # -----------------------------
-# Features & Target
+# Prepare Data
 # -----------------------------
-FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
-TARGET = "cnt"
-
 X = df[FEATURES]
 y = df[TARGET]
 
@@ -74,11 +68,20 @@ st.sidebar.header("Input Values")
 season = st.sidebar.selectbox(
     "Season",
     options=[1, 2, 3, 4],
-    format_func=lambda x: {1:"Spring", 2:"Summer", 3:"Fall", 4:"Winter"}[x]
+    format_func=lambda x: {
+        1: "Spring 🌸",
+        2: "Summer ☀️",
+        3: "Fall 🍂",
+        4: "Winter ❄️"
+    }[x]
 )
 
 # Time inputs
-yr = st.sidebar.selectbox("Year", [0, 1], format_func=lambda x: "2011" if x == 0 else "2012")
+yr = st.sidebar.selectbox(
+    "Year",
+    [0, 1],
+    format_func=lambda x: "2011" if x == 0 else "2012"
+)
 mnth = st.sidebar.slider("Month", 1, 12, 6)
 hr = st.sidebar.slider("Hour", 0, 23, 12)
 
@@ -109,6 +112,3 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
-
-
-
