@@ -13,7 +13,7 @@ st.title("🚲 Bike Demand Prediction App")
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("Dataset.csv")   # make sure case matches GitHub
+    df = pd.read_csv("dataset.csv")   # make sure case matches GitHub
     df.replace("?", np.nan, inplace=True)
     df.dropna(inplace=True)
     return df
@@ -90,3 +90,4 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
