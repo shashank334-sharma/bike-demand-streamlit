@@ -12,13 +12,26 @@ st.title("🚲 Bike Demand Prediction App")
 # Load Data
 # -----------------------------
 @st.cache_data
+@st.cache_data
 def load_data():
-    df = pd.read_csv("dataset.csv")   # make sure case matches GitHub
+    df = pd.read_csv("dataset.csv")
+
+    # Replace ? with NaN
     df.replace("?", np.nan, inplace=True)
-    df.dropna(inplace=True)
+
+    # Columns we will use
+    FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
+    TARGET = "cnt"
+
+    # Convert all features + target to numeric
+    for col in FEATURES + [TARGET]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Drop rows with missing values
+    df.dropna(subset=FEATURES + [TARGET], inplace=True)
+
     return df
 
-df = load_data()
 
 # -----------------------------
 # Features & Target
@@ -90,4 +103,5 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
 
