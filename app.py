@@ -13,10 +13,19 @@ st.title("🚲 Bike Demand Prediction App")
 def load_data():
     df = pd.read_csv("dataset.csv")
     df.replace("?", np.nan, inplace=True)
-    df.dropna(inplace=True)
+
+    FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
+    TARGET = "cnt"
+
+    # ✅ Force numeric conversion (important)
+    for col in FEATURES + [TARGET]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # ✅ Remove bad rows
+    df.dropna(subset=FEATURES + [TARGET], inplace=True)
+
     return df
 
-df = load_data()
 
 # -----------------------------
 # Features (same logic)
@@ -83,3 +92,4 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
