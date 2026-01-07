@@ -13,22 +13,28 @@ st.title("🚲 Bike Demand Prediction App")
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("dataset.csv")   
+    df = pd.read_csv("Dataset.csv")   # make sure case matches GitHub
     df.replace("?", np.nan, inplace=True)
     df.dropna(inplace=True)
     return df
 
 df = load_data()
 
-X = df[["temp", "atemp", "hum", "windspeed"]]
-y = df["cnt"]
+# -----------------------------
+# Features & Target
+# -----------------------------
+FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
+TARGET = "cnt"
+
+X = df[FEATURES]
+y = df[TARGET]
 
 # -----------------------------
 # Train Model
 # -----------------------------
 model = Pipeline(steps=[
     ("scaler", StandardScaler()),
-    ("rf", RandomForestRegressor(n_estimators=150, random_state=42))
+    ("rf", RandomForestRegressor(n_estimators=250, random_state=42))
 ])
 
 model.fit(X, y)
@@ -45,12 +51,30 @@ st.info(f"📊 Model Accuracy (R² Score): {accuracy:.2f}")
 # -----------------------------
 st.sidebar.header("Input Values")
 
+# Season input
+season = st.sidebar.selectbox(
+    "Season",
+    options=[1, 2, 3, 4],
+    format_func=lambda x: {1:"Spring", 2:"Summer", 3:"Fall", 4:"Winter"}[x]
+)
+
+# Time inputs
+yr = st.sidebar.selectbox("Year", [0, 1], format_func=lambda x: "2011" if x == 0 else "2012")
+mnth = st.sidebar.slider("Month", 1, 12, 6)
+hr = st.sidebar.slider("Hour", 0, 23, 12)
+
+# Weather inputs
 temp = st.sidebar.slider("Temperature", 0.0, 1.0, 0.5)
 atemp = st.sidebar.slider("Feels Like Temp", 0.0, 1.0, 0.5)
 hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.5)
 windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
 
+# Input dataframe
 input_data = pd.DataFrame({
+    "season": [season],
+    "yr": [yr],
+    "mnth": [mnth],
+    "hr": [hr],
     "temp": [temp],
     "atemp": [atemp],
     "hum": [hum],
@@ -66,6 +90,3 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
-
-
-
