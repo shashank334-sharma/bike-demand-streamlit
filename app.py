@@ -34,8 +34,14 @@ df = load_data()
 FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
 TARGET = "cnt"
 
-X = df[FEATURES]
-y = df[TARGET]
+X = df[FEATURES].apply(pd.to_numeric, errors="coerce")
+y = pd.to_numeric(df[TARGET], errors="coerce")
+
+# Remove rows that became NaN after conversion
+valid_idx = X.notnull().all(axis=1) & y.notnull()
+X = X[valid_idx]
+y = y[valid_idx]
+
 
 # -----------------------------
 # Train Model (NO scaler, NO pipeline)
@@ -93,5 +99,6 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
 
 
