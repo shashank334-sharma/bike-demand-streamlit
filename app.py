@@ -25,6 +25,7 @@ def load_data():
     df.dropna(subset=FEATURES + [TARGET], inplace=True)
 
     return df
+df = load_data()
 
 
 # -----------------------------
@@ -92,4 +93,5 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
 
