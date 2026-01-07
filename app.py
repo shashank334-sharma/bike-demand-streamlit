@@ -7,50 +7,53 @@ from sklearn.metrics import r2_score
 st.title("🚲 Bike Demand Prediction App")
 
 # -----------------------------
-# Load Data  (same as notebook)
+# Load Data (Bullet-proof)
 # -----------------------------
 @st.cache_data
 def load_data():
     df = pd.read_csv("dataset.csv")
-    df.replace("?", np.nan, inplace=True)
 
+    # Clean column names
+    df.columns = df.columns.str.strip().str.lower()
+
+    # Required columns
     FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
     TARGET = "cnt"
 
-    # ✅ Force numeric conversion (important)
+    # Keep only required columns
+    df = df[FEATURES + [TARGET]]
+
+    # Convert everything to numeric safely
     for col in FEATURES + [TARGET]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # ✅ Remove bad rows
-    df.dropna(subset=FEATURES + [TARGET], inplace=True)
+    # Fill missing values with median (safe for ML)
+    df.fillna(df.median(numeric_only=True), inplace=True)
 
     return df
+
+# -----------------------------
+# Load Dataset
+# -----------------------------
 df = load_data()
 
-
-# -----------------------------
-# Features (same logic)
-# -----------------------------
 FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
 TARGET = "cnt"
 
-X = df[FEATURES].apply(pd.to_numeric, errors="coerce")
-y = pd.to_numeric(df[TARGET], errors="coerce")
-
-# Remove rows that became NaN after conversion
-valid_idx = X.notnull().all(axis=1) & y.notnull()
-X = X[valid_idx]
-y = y[valid_idx]
-
+X = df[FEATURES].values.astype(float)
+y = df[TARGET].values.astype(float)
 
 # -----------------------------
-# Train Model (NO scaler, NO pipeline)
+# Train Model (Stable)
 # -----------------------------
-model = RandomForestRegressor(n_estimators=200, random_state=42)
+model = RandomForestRegressor(
+    n_estimators=200,
+    random_state=42
+)
 model.fit(X, y)
 
 # -----------------------------
-# Model Accuracy
+# Accuracy
 # -----------------------------
 y_pred = model.predict(X)
 accuracy = r2_score(y, y_pred)
@@ -76,22 +79,10 @@ atemp = st.sidebar.slider("Feels Like Temp", 0.0, 1.0, 0.5)
 hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.5)
 windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
 
-# -----------------------------
-# Input Data
-# -----------------------------
-input_data = pd.DataFrame({
-    "season": [season],
-    "yr": [yr],
-    "mnth": [mnth],
-    "hr": [hr],
-    "temp": [temp],
-    "atemp": [atemp],
-    "hum": [hum],
-    "windspeed": [windspeed]
-})
+input_data = np.array([[season, yr, mnth, hr, temp, atemp, hum, windspeed]], dtype=float)
 
 st.subheader("Selected Inputs")
-st.write(input_data)
+st.write(pd.DataFrame(input_data, columns=FEATURES))
 
 # -----------------------------
 # Prediction
@@ -99,6 +90,3 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
-
-
-
