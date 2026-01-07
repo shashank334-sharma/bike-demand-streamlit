@@ -7,6 +7,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 
 st.title("🚲 Bike Demand Prediction App")
+# -----------------------------
+# Features & Target
+# -----------------------------
+FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
+TARGET = "cnt"
+
 
 # -----------------------------
 # Load Data
@@ -103,5 +109,6 @@ st.write(input_data)
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
 
 
