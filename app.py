@@ -40,23 +40,24 @@ df = load_data()
 FEATURES = ["season", "yr", "mnth", "hr", "temp", "atemp", "hum", "windspeed"]
 TARGET = "cnt"
 
+from sklearn.model_selection import train_test_split
+
 X = df[FEATURES].values.astype(float)
 y = df[TARGET].values.astype(float)
 
-# -----------------------------
-# Train Model (Stable)
-# -----------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
 model = RandomForestRegressor(
     n_estimators=200,
     random_state=42
 )
-model.fit(X, y)
+model.fit(X_train, y_train)
 
-# -----------------------------
-# Accuracy
-# -----------------------------
-y_pred = model.predict(X)
-accuracy = r2_score(y, y_pred)
+y_pred = model.predict(X_test)
+accuracy = r2_score(y_test, y_pred)
+
 st.info(f"📊 Model Accuracy (R² Score): {accuracy:.2f}")
 
 # -----------------------------
@@ -90,3 +91,4 @@ st.write(pd.DataFrame(input_data, columns=FEATURES))
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
