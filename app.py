@@ -58,7 +58,7 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 accuracy = r2_score(y_test, y_pred)
 
-st.info(f"📊 Model Accuracy (R² Score): {accuracy:.2f}")
+
 
 # -----------------------------
 # Sidebar Inputs
@@ -91,4 +91,5 @@ st.write(pd.DataFrame(input_data, columns=FEATURES))
 if st.button("Predict"):
     prediction = model.predict(input_data)[0]
     st.success(f"✅ Predicted Bike Count: {int(prediction)}")
+
 
